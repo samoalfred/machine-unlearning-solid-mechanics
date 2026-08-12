@@ -67,6 +67,27 @@ for j=1:numel(fracs)
 end
 fprintf('Saved results/newton_necessity.mat\n');
 
+%% figure (newton_necessity.png): (a) budget sweep, (b) removal-fraction sweep
+f=figure('Position',[60 60 1150 460],'Color','w');
+ax1=subplot(1,2,1); hold on; grid on;
+p1=semilogy(budgets, mean(ftOnlyA,1),'r-o','LineWidth',1.6,'MarkerFaceColor','r');
+p2=semilogy(budgets, mean(newtFtA,1),'m-s','LineWidth',1.6,'MarkerFaceColor','m');
+p3=yline(mean(retrA),'k--','LineWidth',1.4);
+set(ax1,'YScale','log'); xlabel('Fine-tune budget T (iterations)'); ylabel('MSE to true');
+text(0.03,0.06,'(a)','Units','normalized','FontWeight','bold','FontSize',12);
+ax2=subplot(1,2,2); hold on; grid on;
+semilogy(fracs*100, mean(ftOnlyB,1),'r-o','LineWidth',1.6,'MarkerFaceColor','r');
+semilogy(fracs*100, mean(newtFtB,1),'m-s','LineWidth',1.6,'MarkerFaceColor','m');
+semilogy(fracs*100, mean(retrB,1),'k--^','LineWidth',1.4);
+set(ax2,'YScale','log'); xlabel('Removal fraction (%)'); ylabel('MSE to true');
+text(0.90,0.06,'(b)','Units','normalized','FontWeight','bold','FontSize',12);
+set(ax1,'Position',[0.08 0.22 0.40 0.72]); set(ax2,'Position',[0.57 0.22 0.40 0.72]);
+lg=legend(ax1,[p1 p2 p3],{'Fine-tune only','Newton + fine-tune','Retrained baseline'}, ...
+    'Orientation','horizontal','Box','off');
+lg.Units='normalized'; lg.Position=[0.5-lg.Position(3)/2, 0.03, lg.Position(3), lg.Position(4)];
+exportgraphics(f,'newton_necessity.png','Resolution',200);
+fprintf('Saved newton_necessity.png\n');
+
 %% ---------- helpers (shared with algorithm2_ff.m) ----------
 function [Xc,Tc,Xb,Tb,Xt,Tt]=genBeam(Nclean,Nbad,k,Fsc)
     Fc=Fsc*rand(1,Nclean); Fb=Fsc*rand(1,Nbad);

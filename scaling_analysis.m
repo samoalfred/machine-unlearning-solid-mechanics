@@ -53,6 +53,17 @@ sc=struct('params',pcount,'t_cold',t_cold,'t_warm',t_warm,'e_cold',e_cold,'e_war
 save(fullfile('results','scaling.mat'),'sc');
 fprintf('\nSaved results/scaling.mat\n');
 
+%% figure (scaling.png): (a) wall-clock cost vs params, (b) speedup vs params
+f=figure('Position',[60 60 1000 400],'Color','w');
+subplot(1,2,1); loglog(pcount,t_cold,'r-o','LineWidth',1.6,'MarkerFaceColor','r'); hold on; grid on;
+loglog(pcount,t_warm,'b-s','LineWidth',1.6,'MarkerFaceColor','b');
+xlabel('Parameters'); ylabel('Wall-clock time (s)'); title('(a) Cost vs model size');
+legend('Cold retrain','Warm-start unlearn','Location','northwest'); legend boxoff;
+subplot(1,2,2); semilogx(pcount,t_cold./t_warm,'m-^','LineWidth',1.6,'MarkerFaceColor','m'); grid on;
+xlabel('Parameters'); ylabel('Warm-start speedup (\times)'); title('(b) Speedup vs model size');
+exportgraphics(f,'scaling.png','Resolution',200);
+fprintf('Saved scaling.png\n');
+
 function [net,tr]=mk(X,T,arch,ep,doTrain)
     net=feedforwardnet(arch,'trainscg'); net.trainParam.epochs=ep; net.trainParam.goal=1e-7;
     net.trainParam.showWindow=false; net=configure(net,X,T);
