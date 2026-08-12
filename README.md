@@ -19,6 +19,13 @@ followed by a physics-regularized warm-start fine-tune.
 Scripts write their outputs to a `results/` folder (created automatically) and
 save figures as `.png` in the working directory.
 
+## Reproducibility
+
+See **[REPRODUCE.md](REPRODUCE.md)** for the exact order in which to run the
+scripts to regenerate every table and figure in the paper, including which
+scripts are resumable, which figures depend on which results, and a copy-paste
+one-shot driver.
+
 ## Primary results (Case Studies 1-6; Tables 1-6, Figures 2-7)
 | Script | Produces |
 |---|---|
