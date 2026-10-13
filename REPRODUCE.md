@@ -90,3 +90,21 @@ returns early once its `.mat` is complete, so extra iterations are no-ops.)
 - `regen_pinn_figs.m` - superseded by `regen_pinn_figs2.m`.
 - `real_data_unlearning.m` - drop-in template for applying the method to a real
   dataset; not used for any reported result.
+
+## Revision experiments (major revision, round 1)
+
+These scripts were added for the first major revision and produce the new
+tables and figures requested by the reviewers:
+
+- `rev_fourway_ff.m` -- four-way comparison (fine-tune only / Newton only /
+  Newton+fine-tune / full retrain) with retain, forget, and test metrics, for
+  the four feedforward case studies.
+- `rev_pinn_fourway.m` -- the same four-way comparison for the two PINN cases.
+- `rev_pinn_convergence.m` -- PINN convergence study (training-iteration and
+  collocation-density sweeps, plus the full pipeline re-run at the largest budget).
+- `rev_correlated.m` -- a spatially correlated sensor-drift corruption (a harder,
+  more realistic, non-i.i.d. test).
+- `rev_pinn_fisher.m` -- a stronger external baseline (diagonal-Fisher forgetting)
+  on the 2D elasticity PINN.
+
+Each is self-contained and writes its `.mat` output to `results/`.
