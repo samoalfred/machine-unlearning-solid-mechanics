@@ -180,7 +180,7 @@ fill([F_sorted; flipud(F_sorted)], ...
      [mu_full_sorted + 2*sigma_full_sorted; flipud(mu_full_sorted - 2*sigma_full_sorted)], ...
      'b', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
 xlabel('Force F (N)'); ylabel('Deflection δ');
-title('Biased Model with Uncertainty');
+title('(a) Biased ensemble');
 legend('True', 'Mean', '95% CI', 'Location', 'best');
 grid on;
 
@@ -191,7 +191,7 @@ fill([F_sorted; flipud(F_sorted)], ...
      [mu_unlearned_sorted + 2*sigma_unlearned_sorted; flipud(mu_unlearned_sorted - 2*sigma_unlearned_sorted)], ...
      'm', 'FaceAlpha', 0.2, 'EdgeColor', 'none');
 xlabel('Force F (N)'); ylabel('Deflection δ');
-title('Unlearned Model with Uncertainty');
+title('(b) Unlearned ensemble');
 legend('True', 'Mean', '95% CI', 'Location', 'best');
 grid on;
 
@@ -200,11 +200,11 @@ plot(F_sorted, sigma_full_sorted, 'b-', 'LineWidth', 2); hold on;
 plot(F_sorted, sigma_unlearned_sorted, 'm-', 'LineWidth', 2);
 scatter(F_bad, zeros(size(F_bad)) + 0.5*max(sigma_full_sorted), 50, 'rx', 'LineWidth', 2);
 xlabel('Force F (N)'); ylabel('Uncertainty (std)');
-title('Uncertainty Comparison');
+title('(c) Uncertainty comparison');
 legend('Biased', 'Unlearned', 'Corrupted Data', 'Location', 'best');
 grid on;
 
-sgtitle('Uncertainty Quantification', 'FontSize', 14);
+% (no in-figure super-title; caption is in the manuscript)
 
 exportgraphics(gcf, 'uncertainty.png', 'Resolution', 200);
 fprintf('Figure saved to uncertainty.png (200 dpi)\n');

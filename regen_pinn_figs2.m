@@ -2,12 +2,12 @@
 %% displacement field) with multi-panel subplots and NO in-figure sgtitle.
 %% Bar values come from the saved 5-seed statistics; one seed is retrained per
 %% case study to obtain representative fields for plotting.
-clear; clc; close all;
+clc; close all; if ~exist('PINN_PIDX','var'); PINN_PIDX=1:2; end
 Ld=2; R=0.5; Nc=300; Nb=200; Nbad=40; beta=3e-5;
 iters=180; ft=150; cgIters=50; gammaFrac=1e-3; DPI=200; NG=70;
 St=load(fullfile('results','algorithm2_pinn.mat')); Rr=St.Rr;
 
-for pidx=1:2
+for pidx=PINN_PIDX
     isH=(pidx==2);
     if isH, layers=[2 30 30 30 2]; mu=1; lam=1; la=0.05; off=[0.15 0.10]; nm='Neo-Hookean Hyperelasticity';
         uref=@(x,y) deal(la*x.*(1+0.5*R^2./(x.^2+y.^2)), -la*y.*(1+0.5*R^2./(x.^2+y.^2)));
@@ -58,10 +58,11 @@ function makePINNfigs(pidx,nm,K,nL,L,R,NG,DPI,barMean,barStd,resBar)
     % residual maps
     gx=linspace(-L,L,NG); [Gx,Gy]=meshgrid(gx,gx); m=sqrt(Gx.^2+Gy.^2)>R; Xg=[Gx(m)';Gy(m)'];
     Rc=resField(K.pC,Xg,K.mu,K.lam,L,nL,K.isH); Rb=resField(K.pB,Xg,K.mu,K.lam,L,nL,K.isH); Ru=resField(K.pA,Xg,K.mu,K.lam,L,nL,K.isH);
-    figure('Position',[60 60 1200 400],'Color','w'); cl=[0 max(Rb)]; Rs={Rc,Rb,Ru}; tt={'(a) Clean','(b) Biased','(c) Unlearned'};
-    for k=1:3, subplot(1,3,k); Z=nan(size(Gx)); Z(m)=Rs{k};
+    figure('Position',[60 60 1100 800],'Color','w'); cl=[0 max(Rb)];
+    Rs={Rc,Rb,Ru,abs(Rb-Rc)}; tt={'(a) Clean','(b) Biased','(c) Unlearned','(d) |Biased - Clean|'};
+    for k=1:4, subplot(2,2,k); Z=nan(size(Gx)); Z(m)=Rs{k};
         imagesc(gx,gx,Z); set(gca,'YDir','normal'); hold on; plot(R*cos(th2),R*sin(th2),'w-','LineWidth',2);
-        axis equal; axis tight; caxis(cl); c=colorbar; c.Label.String=lbl; title(tt{k}); xlabel('x'); ylabel('y'); end
+        axis equal; axis tight; if k<4, caxis(cl); end; c=colorbar; c.Label.String=lbl; title(tt{k}); xlabel('x'); ylabel('y'); end
     exportgraphics(gcf,[pfx '_residuals.png'],'Resolution',DPI); fprintf('  saved %s_residuals.png\n',pfx);
     % displacement field for hyperelastic
     if K.isH

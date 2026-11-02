@@ -54,9 +54,12 @@ of the Results section:
 
 ## Step 3 - Efficiency figure (depends on some Step-0/2 outputs)
 
-17. **`computational_efficiency.m`** -> `computational_efficiency.png`,
-    `results/efficiency.mat`. Run this after the case-study and analysis scripts,
-    since it collates their timings.
+17. **`rev_efficiency_ff.m`** and **`rev_efficiency_pinn.m`** -> Table 9 of the
+    manuscript (`results/rev_efficiency_ff.mat`, `results/rev_efficiency_pinn.mat`).
+    They time a full cold retrain against Algorithm 1 (adaptive damped Newton step +
+    fine-tune) with the same budgets as the main results, 10 runs per case.
+    `computational_efficiency.m` is kept for reference only: it collates timings
+    from the archived pre-revision prototypes and is not used for Table 9.
 
 ## One-shot driver (optional)
 
@@ -108,3 +111,29 @@ tables and figures requested by the reviewers:
   on the 2D elasticity PINN.
 
 Each is self-contained and writes its `.mat` output to `results/`.
+
+## Revision experiments (major revision, rounds 2-5)
+
+- `rev_optimizer_compare.m`, `rev_optimizer_pinn.m` -- sensitivity to the training
+  optimizer (Adam vs Levenberg--Marquardt, tight and loss-matched).
+- `rev_comparison_surrogates.m`, `rev_comparison_pinn6.m` -- SISA / Fisher
+  baselines on Case Studies 2-4 and the Neo-Hookean PINN (Appendix C);
+  `comparison_bars_fig.m` draws the comparison figure.
+- `correlated_drift_fig.m` -- figure for the correlated sensor-drift study
+  (data from `rev_correlated.m`).
+- `uq_all_ff.m`, `uq_all_pinn.m`, `uq_summary.m` -- uncertainty quantification
+  across all six case studies (Appendix A). Each ensemble uses one fixed test set
+  shared by all members. Run everything with **`run_uq_all.m`**.
+- `ablation_all_ff.m`, `ablation_all_pinn.m` -- ablation across the case studies
+  (Appendix B); `replot_ablation_fig.m`, `replot_analysis_figs.m` redraw figures.
+- `rev_efficiency_ff.m`, `rev_efficiency_pinn.m` -- Table 9 timings (see Step 3).
+- `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies of
+  the two second-order diagnostics (identical results, one seed per call).
+- `check_beam_min.m`, `make_casestudy_fig.m` -- small diagnostic / draft-figure
+  helpers; `make_casestudy_fig.m` is a draft and did not produce the published
+  case-study schematic.
+
+Optimizer note: the primary results use Adam in the `dlarray` framework. The
+decomposition, beam UQ and ablation (`UQ.m`, `ablation_script.m`), the surrogate
+SISA/Fisher comparisons, and the valid-data test use MATLAB's `feedforwardnet`
+(Levenberg--Marquardt); `scaling_analysis.m` uses scaled conjugate gradient.

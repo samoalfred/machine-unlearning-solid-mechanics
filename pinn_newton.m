@@ -12,25 +12,29 @@
 
 clear; clc; close all;
 rng(42);
-L=2; R=0.5; mu=1.0; lambda=1.0; load_amp=0.05;
-N_coll=300; N_bnd=200; N_bad=40; layers=[2 30 30 30 2];
-iters=250; beta=3e-5; nSeed=2;
-lams=[1e-2 1e-1 1];
-uref=@(x,y) deal(load_amp*x.*(1+0.5*R^2./(x.^2+y.^2)), -load_amp*y.*(1+0.5*R^2./(x.^2+y.^2)));
 
-mse_b=zeros(nSeed,1); mse_r=zeros(nSeed,1); mse_f=zeros(nSeed,1);
-res_b=zeros(nSeed,1); res_r=zeros(nSeed,1);
-mse_n=zeros(nSeed,numel(lams)); res_n=zeros(nSeed,numel(lams)); sn=zeros(nSeed,numel(lams));
+% ---- problem setup ----
+L=2; R=0.5; mu=1.0; lambda=1.0; load_amp=0.05;   % plate half-width, hole radius, material constants, load amplitude
+N_coll=300; N_bnd=200; N_bad=40; layers=[2 30 30 30 2];   % #collocation/#boundary/#corrupted points, network
+iters=250; beta=3e-5; nSeed=2;   % training iters, physics weight, seeds
+lams=[1e-2 1e-1 1];   % CG damping values to sweep
+uref=@(x,y) deal(load_amp*x.*(1+0.5*R^2./(x.^2+y.^2)), -load_amp*y.*(1+0.5*R^2./(x.^2+y.^2)));   % analytic reference displacement field
 
+% ---- accumulators over seeds ----
+mse_b=zeros(nSeed,1); mse_r=zeros(nSeed,1); mse_f=zeros(nSeed,1);   % biased / retrained / first-order MSE
+res_b=zeros(nSeed,1); res_r=zeros(nSeed,1);   % biased / retrained mean residual
+mse_n=zeros(nSeed,numel(lams)); res_n=zeros(nSeed,numel(lams)); sn=zeros(nSeed,numel(lams));   % Newton MSE / residual / step-norm per damping
+
+% ---- seed loop ----
 for s=1:nSeed
     rng(60+s);
-    Xc=sampleDomain(N_coll,L,R);
-    th=2*pi*rand(1,N_bnd/2); Xh=[R*cos(th);R*sin(th)];
-    Xo=outerEdges(N_bnd-N_bnd/2,L); Xb=[Xh,Xo];
-    [ubx,uby]=uref(Xb(1,:),Xb(2,:)); Ub=[ubx;uby];
-    badIdx=randperm(size(Xh,2),N_bad); Ub_bad=Ub;
-    Ub_bad(1,badIdx)=Ub_bad(1,badIdx)+0.15; Ub_bad(2,badIdx)=Ub_bad(2,badIdx)+0.10;
-    Xt=sampleDomain(1500,L,R); [utx,uty]=uref(Xt(1,:),Xt(2,:)); Ut=[utx;uty];
+    Xc=sampleDomain(N_coll,L,R);   % collocation points outside the hole
+    th=2*pi*rand(1,N_bnd/2); Xh=[R*cos(th);R*sin(th)];   % hole-rim boundary points
+    Xo=outerEdges(N_bnd-N_bnd/2,L); Xb=[Xh,Xo];   % outer-edge boundary points
+    [ubx,uby]=uref(Xb(1,:),Xb(2,:)); Ub=[ubx;uby];   % clean boundary displacements
+    badIdx=randperm(size(Xh,2),N_bad); Ub_bad=Ub;   % choose a corrupted subset of hole-rim points
+    Ub_bad(1,badIdx)=Ub_bad(1,badIdx)+0.15; Ub_bad(2,badIdx)=Ub_bad(2,badIdx)+0.10;   % apply the corruption offset
+    Xt=sampleDomain(1500,L,R); [utx,uty]=uref(Xt(1,:),Xt(2,:)); Ut=[utx;uty];   % test set + its reference field
 
     pC=trainPINN(layers,Xc,Xb,Ub,mu,lambda,L,iters,beta);       % retrained (clean)
     pB=trainPINN(layers,Xc,Xb,Ub_bad,mu,lambda,L,iters,beta);   % biased
@@ -48,8 +52,8 @@ for s=1:nSeed
     mse_f(s)=predMSE(pF,Xt,Ut,layers,L);
 
     for li=1:numel(lams)
-        v=cgSolve(pB,gbad,Xbd,Ubd,lams(li),100,1e-6,nL);
-        pN=axpy(pB,1.0,v);
+        v=cgSolve(pB,gbad,Xbd,Ubd,lams(li),100,1e-6,nL);   % solve (H_data + lam I) v = g_bad
+        pN=axpy(pB,1.0,v);   % influence step: theta + v
         mse_n(s,li)=predMSE(pN,Xt,Ut,layers,L);
         res_n(s,li)=meanResidual(pN,Xc,mu,lambda,L,layers);
         sn(s,li)=sqrt(sdot(v,v));
@@ -58,6 +62,7 @@ for s=1:nSeed
     fprintf('%.3e ',mse_n(s,:)); fprintf('\n');
 end
 
+% ---- summary over seeds ----
 fprintf('\n=== Newton influence on Neo-Hookean PINN (mean over %d seeds), NO fine-tuning ===\n',nSeed);
 fprintf('Biased    : MSE %.3e  resid %.3f\n',mean(mse_b),mean(res_b));
 fprintf('Retrained : MSE %.3e  resid %.3f\n',mean(mse_r),mean(res_r));
@@ -73,18 +78,22 @@ save(fullfile('results','pinn_newton.mat'),'hp');
 fprintf('\nSaved results/pinn_newton.mat\n');
 
 %% helpers
+% sampleDomain: rejection-sample N interior points that lie outside the hole
 function X=sampleDomain(N,L,R); X=zeros(2,N); c=0;
     while c<N, p=-L+2*L*rand(2,1); if norm(p)>R, c=c+1; X(:,c)=p; end, end
 end
+% outerEdges: N points sampled uniformly along the four outer edges
 function X=outerEdges(N,L); X=zeros(2,N);
     for i=1:N, s=randi(4); t=-L+2*L*rand();
         switch s, case 1,X(:,i)=[t;L]; case 2,X(:,i)=[t;-L]; case 3,X(:,i)=[L;t]; case 4,X(:,i)=[-L;t]; end
     end
 end
+% mlp: forward pass -- tanh hidden layers, linear output
 function Y=mlp(X,p,L); A=X;
     for i=1:L-1, A=tanh(p.(sprintf('W%d',i))*A+p.(sprintf('b%d',i))); end
     Y=p.(sprintf('W%d',L))*A+p.(sprintf('b%d',L));
 end
+% initP: He-style init; last layer starts near zero for a gentle PINN start
 function p=initP(layers); p=struct;
     for i=1:numel(layers)-1
         s=sqrt(2/layers(i)); if i==numel(layers)-1, s=0.01; end
@@ -92,8 +101,9 @@ function p=initP(layers); p=struct;
         p.(sprintf('b%d',i))=dlarray(zeros(layers(i+1),1));
     end
 end
+% trainPINN: Adam training minimizing boundary data loss + beta*physics loss
 function p=trainPINN(layers,Xc,Xb,Ub,mu,lam,L,iters,beta)
-    p=initP(layers); Xcd=dlarray(Xc/L); Xbd=dlarray(Xb/L); Ubd=dlarray(Ub);
+    p=initP(layers); Xcd=dlarray(Xc/L); Xbd=dlarray(Xb/L); Ubd=dlarray(Ub);   % inputs scaled by L
     aG=[]; aS=[]; lr=2e-3; nL=numel(layers)-1;
     for it=1:iters
         [~,g]=dlfeval(@loss,p,Xcd,Xbd,Ubd,mu,lam,L,nL,beta);
@@ -101,50 +111,58 @@ function p=trainPINN(layers,Xc,Xb,Ub,mu,lam,L,iters,beta)
         [p,aG,aS]=adamupdate(p,g,aG,aS,it,lr);
     end
 end
+% loss: boundary data MSE + beta * mean squared equilibrium residual
 function [l,grad]=loss(p,Xc,Xb,Ub,mu,lam,L,nL,beta)
-    dl=mean((mlp(Xb,p,nL)-Ub).^2,'all');
-    [rx,ry]=equilibrium(Xc,p,mu,lam,L,nL);
+    dl=mean((mlp(Xb,p,nL)-Ub).^2,'all');   % boundary data term
+    [rx,ry]=equilibrium(Xc,p,mu,lam,L,nL);   % Neo-Hookean residual div(P) via AD
     l=dl+beta*mean(rx.^2+ry.^2,'all'); grad=dlgradient(l,p);
 end
+% gradSubset: g_bad = gradient of (sum of subset squared errors)/Nbnd (boundary data loss)
 function g=gradSubset(p,Xsub,Tsub,Nbnd,nL)
     l=sum((mlp(Xsub,p,nL)-Tsub).^2,'all')/Nbnd; g=dlgradient(l,p);
 end
+% hvpData: Hessian-vector product of the boundary DATA loss, via double backprop (no H formed)
 function Hv=hvpData(p,v,Xb,Ub,nL)
     g=dlgradient(mean((mlp(Xb,p,nL)-Ub).^2,'all'), p, 'EnableHigherDerivatives',true);
     gv=0; f=fieldnames(g); for i=1:numel(f), gv=gv+sum(g.(f{i}).*v.(f{i}),'all'); end
     Hv=dlgradient(gv,p);
 end
+% cgSolve: damped conjugate gradient for (H_data + lam I) v = g, with a curvature guard
 function v=cgSolve(p,g,Xb,Ub,lam,maxit,tol,nL)
     x=scal(g,0); r=g; pp=r; rs=sdot(r,r); g0=sqrt(rs);
     for it=1:maxit
         Hp=dlfeval(@hvpData,p,pp,Xb,Ub,nL);
-        Ap=axpy(Hp,lam,pp);
-        den=sdot(pp,Ap); if den<=0, den=den+lam*sdot(pp,pp)+1e-12; end
+        Ap=axpy(Hp,lam,pp);   % (H + lam I) pp
+        den=sdot(pp,Ap); if den<=0, den=den+lam*sdot(pp,pp)+1e-12; end   % guard against non-positive curvature
         al=rs/den; x=axpy(x,al,pp); r=axpy(r,-al,Ap);
         rs2=sdot(r,r); if sqrt(rs2)<tol*g0, break; end
         pp=axpy(r,rs2/rs,pp); rs=rs2;
     end
     v=x;
 end
+% equilibrium: NEO-HOOKEAN residual div(P), P = first Piola-Kirchhoff stress, via AD
 function [rx,ry]=equilibrium(Xs,p,mu,lam,L,nL)
     U=mlp(Xs,p,nL); ux=U(1,:); uy=U(2,:);
     dux=dlgradient(sum(ux,'all'),Xs,'EnableHigherDerivatives',true)/L;
     duy=dlgradient(sum(uy,'all'),Xs,'EnableHigherDerivatives',true)/L;
-    a=1+dux(1,:); b=dux(2,:); c=duy(1,:); d=1+duy(2,:);
-    J=a.*d-b.*c; iTxx=d./J; iTxy=-c./J; iTyx=-b./J; iTyy=a./J; lJ=log(J);
-    Pxx=mu*(a-iTxx)+lam*lJ.*iTxx; Pxy=mu*(b-iTxy)+lam*lJ.*iTxy;
+    a=1+dux(1,:); b=dux(2,:); c=duy(1,:); d=1+duy(2,:);   % deformation gradient F
+    J=a.*d-b.*c; iTxx=d./J; iTxy=-c./J; iTyx=-b./J; iTyy=a./J; lJ=log(J);   % det J, inverse-transpose of F, log J
+    Pxx=mu*(a-iTxx)+lam*lJ.*iTxx; Pxy=mu*(b-iTxy)+lam*lJ.*iTxy;   % P = mu(F - F^-T) + lam*lnJ*F^-T
     Pyx=mu*(c-iTyx)+lam*lJ.*iTyx; Pyy=mu*(d-iTyy)+lam*lJ.*iTyy;
     dPxx=dlgradient(sum(Pxx,'all'),Xs,'EnableHigherDerivatives',true)/L;
     dPxy=dlgradient(sum(Pxy,'all'),Xs,'EnableHigherDerivatives',true)/L;
     dPyx=dlgradient(sum(Pyx,'all'),Xs,'EnableHigherDerivatives',true)/L;
     dPyy=dlgradient(sum(Pyy,'all'),Xs,'EnableHigherDerivatives',true)/L;
-    rx=dPxx(1,:)+dPxy(2,:); ry=dPyx(1,:)+dPyy(2,:);
+    rx=dPxx(1,:)+dPxy(2,:); ry=dPyx(1,:)+dPyy(2,:);   % residual = divergence of P
 end
+% predMSE: test MSE against the analytic reference field (inputs scaled by L)
 function m=predMSE(p,Xt,Ut,layers,L); U=extractdata(mlp(dlarray(Xt/L),p,numel(layers)-1)); m=mean((U(:)-Ut(:)).^2); end
+% meanResidual: mean |equilibrium residual| over the collocation points
 function rm=meanResidual(p,Xc,mu,lam,L,layers)
     Xs=dlarray(Xc/L); [rx,ry]=dlfeval(@equilibrium,Xs,p,mu,lam,L,numel(layers)-1);
     rm=mean(sqrt(extractdata(rx).^2+extractdata(ry).^2));
 end
-function o=axpy(a,al,b); o=a; f=fieldnames(a); for i=1:numel(f), o.(f{i})=a.(f{i})+al*b.(f{i}); end, end
-function o=scal(a,c); o=a; f=fieldnames(a); for i=1:numel(f), o.(f{i})=c*a.(f{i}); end, end
-function s=sdot(a,b); s=0; f=fieldnames(a); for i=1:numel(f), s=s+sum(a.(f{i}).*b.(f{i}),'all'); end, s=double(gather(extractdata(s))); end
+% struct-vector ops: treat the parameter struct as one vector
+function o=axpy(a,al,b); o=a; f=fieldnames(a); for i=1:numel(f), o.(f{i})=a.(f{i})+al*b.(f{i}); end, end   % a + al*b
+function o=scal(a,c); o=a; f=fieldnames(a); for i=1:numel(f), o.(f{i})=c*a.(f{i}); end, end   % c*a
+function s=sdot(a,b); s=0; f=fieldnames(a); for i=1:numel(f), s=s+sum(a.(f{i}).*b.(f{i}),'all'); end, s=double(gather(extractdata(s))); end   % inner product
