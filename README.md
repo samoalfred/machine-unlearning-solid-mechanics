@@ -71,6 +71,10 @@ All case studies use analytically generated data with controlled, injected
 corruption, and the points to remove are assumed known. The study is a proof of
 concept; validation on real experimental or finite-element data is future work.
 
+## License
+
+Released under the [MIT License](LICENSE).
+
 ## Citation
 
 If you use this code, please cite the accompanying manuscript (full reference
