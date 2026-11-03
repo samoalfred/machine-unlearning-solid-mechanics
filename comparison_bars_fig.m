@@ -1,4 +1,4 @@
-%% Figure 14: beam baseline comparison (Table 10).
+%% Bar-chart version of Table 10 (beam baseline comparison); not in the final manuscript.
 %% (a) clean-test MSE and (b) wall-clock speedup over full retraining, for full
 %% retraining, SISA, Fisher forgetting, and the first-order step + fine-tune.
 %% Reads results/comparison.mat (written by comparison_script.m) and saves

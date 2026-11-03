@@ -34,25 +34,25 @@ end
 
 if any(stages == 2)
     step('Stage 2: analysis studies (Section 4)');
-    run1('run_uq_all');                          % Figure 12, Table 24, Figure 18
+    run1('run_uq_all');                          % Figure 12, Table 24, Figure 17
     run1('ablation_script');                     % Figure 13 (beam ablation)
-    run1('comparison_script'); run1('comparison_bars_fig');   % Table 10, Figure 14
+    run1('comparison_script');                   % Table 10
     run1('rev_pinn_fisher');                     % Table 11
     for c = 1:4, run1(sprintf('ROC_CASE=%d; rev_optimizer_compare', c)); end   % Table 12 (surrogates)
     for c = 1:2, run1(sprintf('ROP_CASE=%d; rev_optimizer_pinn', c)); end      % Table 12 (PINNs)
     run1('clear ROC_CASE ROP_CASE');
     run1('rev_fourway_ff'); run1('rev_pinn_fourway');          % Tables 14-15
     run1('rev_pinn_convergence');                % Table 16
-    run1('rev_correlated'); run1('correlated_drift_fig');      % Figure 15
+    run1('rev_correlated'); run1('correlated_drift_fig');      % Figure 14
     run1('forgetting_analysis');                 % Table 17
     run1('pinn_decomposition');                  % Table 18
     run1('hessian_influence');                   % Table 19
     run1('pinn_newton');                         % Table 20
     run1('damping_guidance');                    % lambda_max estimate (Section 4.18)
-    run1('newton_necessity');                    % Table 21, Figure 16
+    run1('newton_necessity');                    % Table 21, Figure 15
     run1('similarity_forget');                   % valid-data test (Section 4.20)
     run1('beta_ablation_5seed');                 % Table 22
-    run1('scaling_analysis');                    % Table 23, Figure 17
+    run1('scaling_analysis');                    % Table 23, Figure 16
 end
 
 if any(stages == 3)

@@ -81,27 +81,27 @@ Figure 1 the method schematic; neither needs code.
 |---|---|---|
 | Figure 12 (beam uncertainty) | `run_uq_all.m` (runs `uq_all_ff.m`, `uq_all_pinn.m`, `uq_summary.m`) | `uncertainty.png`, `results/uq_all_*.mat` |
 | Figure 13 (beam ablation) | `ablation_script.m` (`replot_ablation_fig.m` redraws it) | `ablation.png`, `results/ablation.mat` |
-| Table 10, Figure 14 (beam: SISA, Fisher, retraining) | `comparison_script.m`, then `comparison_bars_fig.m` | `results/comparison.mat`, `comparison_bars.png` |
+| Table 10 (beam: SISA, Fisher, retraining) | `comparison_script.m` | `results/comparison.mat` |
 | Table 11 (Fisher forgetting vs Newton on the elasticity PINN) | `rev_pinn_fisher.m` | `results/rev_pinn_fisher.mat` |
 | Table 12 (Adam vs Levenberg-Marquardt) | `rev_optimizer_compare.m` (`ROC_CASE`), `rev_optimizer_pinn.m` (`ROP_CASE`) | `results/rev_optimizer_*.mat` |
 | Table 14 (four-way comparison), Table 15 (retain/forget/test) | `rev_fourway_ff.m`, `rev_pinn_fourway.m` | `results/rev_fourway_ff.mat`, `results/rev_pinn_fourway.mat` |
 | Table 16 (PINN convergence) | `rev_pinn_convergence.m` | `results/rev_pinn_convergence.mat` |
-| Figure 15 (correlated sensor drift) | `rev_correlated.m`, then `correlated_drift_fig.m` | `results/rev_correlated.mat`, `correlated_drift.png` |
+| Figure 14 (correlated sensor drift) | `rev_correlated.m`, then `correlated_drift_fig.m` | `results/rev_correlated.mat`, `correlated_drift.png` |
 | Table 17 (decomposition, beam) | `forgetting_analysis.m` | `results/forgetting.mat` |
 | Table 18 (decomposition, elasticity PINN) | `pinn_decomposition.m` | printed table |
 | Table 19 (Newton step, beam) | `hessian_influence.m` | `results/hessian_influence.mat` |
 | Table 20 (Newton step, Neo-Hookean PINN) | `pinn_newton.m` | `results/pinn_newton.mat` |
 | Damping guidance (lambda_max estimate, Section 4.18) | `damping_guidance.m` | `results/damping_guidance.mat` |
-| Table 21, Figure 16 (when the Newton step helps) | `newton_necessity.m` | `newton_necessity.png`, `results/newton_necessity.mat` |
+| Table 21, Figure 15 (when the Newton step helps) | `newton_necessity.m` | `newton_necessity.png`, `results/newton_necessity.mat` |
 | Valid-data forgetting test (Section 4.20) | `similarity_forget.m` | `results/similarity_forget.mat` |
 | Table 22 (physics weight) | `beta_ablation_5seed.m` | `results/beta_ablation_5seed.mat` |
-| Table 23, Figure 17 (model-size scaling) | `scaling_analysis.m` | `scaling.png`, `results/scaling.mat` |
+| Table 23, Figure 16 (model-size scaling) | `scaling_analysis.m` | `scaling.png`, `results/scaling.mat` |
 
 ### Appendices -- `run_all(3)` (Appendix A is produced in stage 2)
 
 | Manuscript item | Script(s) | Output |
 |---|---|---|
-| Table 24, Figure 18 (Appendix A, uncertainty across cases) | `run_uq_all.m` | `uq_appendix.png` |
+| Table 24, Figure 17 (Appendix A, uncertainty across cases) | `run_uq_all.m` | `uq_appendix.png` |
 | Table 25 (Appendix B, ablation across cases, 5 seeds, matched baseline) | `rev_ablation5_ff.m` (`AB_CASE`=2:4), `rev_ablation5_pinn.m` (`ABP_CASE`=1:2) | `results/ablation5_ff.mat`, `results/ablation5_pinn.mat` |
 | Table 26 (Appendix C, SISA and Fisher on Case Studies 2-4 and 6) | `rev_comparison_surrogates.m`, `rev_comparison_pinn6.m` (5 calls) | `results/rev_comparison_*.mat` |
 | Table 27 (Appendix D, matched-iteration retrain and safeguard check) | `rev_matched_retrain_ff.m`, `rev_matched_retrain_pinn.m` | `results/matched_retrain_*.mat` |
@@ -139,5 +139,7 @@ reported result.
 - `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies
   of `hessian_influence.m` and `pinn_newton.m` (same results, one seed per call).
 - `check_beam_min.m` -- small diagnostic of the beam training data.
+- `comparison_bars_fig.m` -- bar-chart version of Table 10 (from `results/comparison.mat`);
+  not included in the final manuscript.
 - `make_casestudy_fig.m` -- early draft of Figure 2; the published figure comes
   from `make_case_study_setups.m`.
