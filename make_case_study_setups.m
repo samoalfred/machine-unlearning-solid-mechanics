@@ -75,6 +75,7 @@ arrow(ax,.28,.59,.12,.59,LD,2.0,'-'); arrow(ax,.72,.59,.88,.59,LD,2.0,'-');
 rng(11); tb = sort(2*pi*rand(1,9)); xmark(ax,.50+.095*cos(tb),.59+.058*sin(tb),RD);
 cap(ax,'finite stretch,\ $\nabla\!\cdot\!\mathbf{P} = \mathbf{0}$','corrupted: hole-boundary displacements ($\times$)',RD);
 
+annotation(fig,'rectangle',[0.004 0.004 0.992 0.992],'Color',K,'LineWidth',1.2);   % bounding box around the whole figure
 exportgraphics(fig,OUT,'Resolution',600,'BackgroundColor','white');
 fprintf('saved %s\n',OUT);
 
