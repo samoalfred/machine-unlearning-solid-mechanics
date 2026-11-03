@@ -134,6 +134,9 @@ Each is self-contained and writes its `.mat` output to `results/`.
   (case-study schematic) is produced by **`make_case_study_setups.m`**.
 
 Optimizer note: the primary results use Adam in the `dlarray` framework. The
-decomposition, beam UQ and ablation (`UQ.m`, `ablation_script.m`), the surrogate
+decomposition, the beam ablation (`ablation_script.m`), the surrogate
 SISA/Fisher comparisons, and the valid-data test use MATLAB's `feedforwardnet`
 (Levenberg--Marquardt); `scaling_analysis.m` uses scaled conjugate gradient.
+
+The beam uncertainty figure and Section 4.9 numbers now come from the corrected
+Adam ensembles (`uq_all_ff.m` + `uq_summary.m`); `UQ.m` is kept for reference only.
