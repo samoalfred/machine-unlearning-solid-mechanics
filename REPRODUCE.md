@@ -137,6 +137,10 @@ Each is self-contained and writes its `.mat` output to `results/`.
   Algorithm 1 with the main-result seeds and add retrained references with a matched
   iteration count (retrained + same fine-tune; cold retrain for the same total budget),
   plus the safeguard check (`results/matched_retrain_ff.mat`, `results/matched_retrain_pinn.mat`).
+- `rev_ablation5_ff.m`, `rev_ablation5_pinn.m` -- Appendix B (Table 19): 5-seed ablation of the
+  number of removed points and the corruption magnitude for Case Studies 2-6, with a matched
+  clean baseline (clean model + same fine-tune). Run `for AB_CASE=2:4, rev_ablation5_ff; end`
+  and `for ABP_CASE=1:2, rev_ablation5_pinn; end` (`results/ablation5_ff.mat`, `results/ablation5_pinn.mat`).
 - `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies of
   the two second-order diagnostics (identical results, one seed per call).
 - `check_beam_min.m`, `make_casestudy_fig.m` -- small diagnostic / draft-figure
