@@ -133,6 +133,10 @@ Each is self-contained and writes its `.mat` output to `results/`.
 - `rev_pinn_paired_cs6.m` -- per-seed Case Study 6 errors (same seeds as
   `algorithm2_pinn.m`) for the paired unlearned-vs-retrained test in Section 4
   (`results/pinn_paired_cs6.mat`).
+- `rev_matched_retrain_ff.m`, `rev_matched_retrain_pinn.m` -- Appendix D (Table 27): re-run
+  Algorithm 1 with the main-result seeds and add retrained references with a matched
+  iteration count (retrained + same fine-tune; cold retrain for the same total budget),
+  plus the safeguard check (`results/matched_retrain_ff.mat`, `results/matched_retrain_pinn.mat`).
 - `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies of
   the two second-order diagnostics (identical results, one seed per call).
 - `check_beam_min.m`, `make_casestudy_fig.m` -- small diagnostic / draft-figure
