@@ -130,8 +130,8 @@ Each is self-contained and writes its `.mat` output to `results/`.
 - `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies of
   the two second-order diagnostics (identical results, one seed per call).
 - `check_beam_min.m`, `make_casestudy_fig.m` -- small diagnostic / draft-figure
-  helpers; `make_casestudy_fig.m` is a draft and did not produce the published
-  case-study schematic.
+  helpers; `make_casestudy_fig.m` is an early draft; the published Figure 2
+  (case-study schematic) is produced by **`make_case_study_setups.m`**.
 
 Optimizer note: the primary results use Adam in the `dlarray` framework. The
 decomposition, beam UQ and ablation (`UQ.m`, `ablation_script.m`), the surrogate
