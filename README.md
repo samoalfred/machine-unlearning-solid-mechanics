@@ -9,7 +9,8 @@ procedure for neural-network surrogates and physics-informed neural networks
 (PINNs), and reproduce all reported numbers, tables, and figures. Unlearning is
 performed by a damped second-order (Newton) influence update solved by
 conjugate gradient with automatic-differentiation Hessian-vector products,
-followed by a physics-regularized warm-start fine-tune.
+followed by a short warm-start fine-tune on the retained data (physics-regularized
+for the PINNs).
 
 ## Requirements
 - MATLAB R2025a or newer
@@ -51,6 +52,13 @@ one-shot driver.
 | `scaling_analysis.m` | Model-size scaling of the warm-start speedup |
 | `computational_efficiency.m` | Wall-clock efficiency comparison |
 
+## Revision studies
+The `rev_*.m` scripts produce the studies added in the revision: the four-way
+comparison, physical-consistency metrics, PINN baselines, convergence, correlated
+drift, optimizer sensitivity, efficiency timings, paired tests, the 5-seed
+across-case ablation (Appendix B), and the matched-iteration retrained reference
+(Appendix D). Each is listed with its output file in [REPRODUCE.md](REPRODUCE.md).
+
 ## Applying the method to your own data
 `real_data_unlearning.m` is a data-agnostic template: supply a CSV of
 feature-target rows with an `is_removed` flag, and it runs the full pipeline
@@ -59,11 +67,6 @@ and reports clean/biased/unlearned errors. It does not generate data and will
 stop if no dataset is provided.
 
 ## Notes
-- The six `MLU_*`/`MUL_*` example scripts are the original per-case-study
-  implementations. The reported Tables 1-6 use the unified `algorithm2_ff.m` /
-  `algorithm2_pinn.m` runs, which supersede them.
-- `beta_ablation.m` (single seed) is superseded by `beta_ablation_5seed.m`;
-  `regen_pinn_figs.m` is superseded by `regen_pinn_figs2.m`.
 - All data are analytically generated with controlled corruption; this study is
   a proof of concept, and validation on real experimental or finite-element
   datasets is future work.

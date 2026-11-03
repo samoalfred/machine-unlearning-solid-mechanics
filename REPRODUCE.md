@@ -87,10 +87,6 @@ returns early once its `.mat` is complete, so extra iterations are no-ops.)
 
 ## Not part of reproduction
 
-- `MLU_*` / `MUL_*` - the original per-case-study prototypes, superseded by
-  `algorithm2_ff.m` / `algorithm2_pinn.m` for the reported numbers.
-- `beta_ablation.m` (single seed) - superseded by `beta_ablation_5seed.m`.
-- `regen_pinn_figs.m` - superseded by `regen_pinn_figs2.m`.
 - `real_data_unlearning.m` - drop-in template for applying the method to a real
   dataset; not used for any reported result.
 
@@ -124,8 +120,9 @@ Each is self-contained and writes its `.mat` output to `results/`.
 - `uq_all_ff.m`, `uq_all_pinn.m`, `uq_summary.m` -- uncertainty quantification
   across all six case studies (Appendix A). Each ensemble uses one fixed test set
   shared by all members. Run everything with **`run_uq_all.m`**.
-- `ablation_all_ff.m`, `ablation_all_pinn.m` -- ablation across the case studies
-  (Appendix B); `replot_ablation_fig.m`, `replot_analysis_figs.m` redraw figures.
+- `ablation_all_ff.m`, `ablation_all_pinn.m` -- earlier 2-seed ablation across the case
+  studies, superseded for Appendix B by `rev_ablation5_ff.m` / `rev_ablation5_pinn.m`
+  (below); `replot_ablation_fig.m`, `replot_analysis_figs.m` redraw figures.
 - `rev_efficiency_ff.m`, `rev_efficiency_pinn.m` -- Table 9 timings (see Step 3).
 - `rev_physics_metrics_ff.m` -- Table 8 physical-consistency metrics for Case Studies
   1, 3, 4, computed on the Algorithm 1 models (same seeds as `algorithm2_ff.m`;
