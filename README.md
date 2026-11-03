@@ -4,69 +4,74 @@ MATLAB code accompanying the manuscript *"Machine Unlearning for Neural-Network
 Models in Solid Mechanics"* (Samuel Onimpa Alfred, Aerospace Engineering
 Department, University of Michigan, Ann Arbor).
 
-The scripts implement a physics-informed data-removal (machine unlearning)
-procedure for neural-network surrogates and physics-informed neural networks
-(PINNs), and reproduce all reported numbers, tables, and figures. Unlearning is
-performed by a damped second-order (Newton) influence update solved by
-conjugate gradient with automatic-differentiation Hessian-vector products,
-followed by a short warm-start fine-tune on the retained data (physics-regularized
-for the PINNs).
+The code removes the influence of known faulty or obsolete training data from a
+trained neural network without retraining it from scratch. It covers
+feedforward surrogates and physics-informed neural networks (PINNs) on six
+solid-mechanics case studies, and reproduces every number, table, and figure in
+the paper.
+
+## The method in brief
+
+Given a trained model and the set of points to remove, Algorithm 1 in the paper:
+
+1. **Newton step.** Solves the damped influence system
+   `(H + gamma*I) v = g_removed` by conjugate gradient, using Hessian-vector
+   products from automatic differentiation (the Hessian is never formed), and
+   updates the weights by `v`. The damping `gamma` starts at `1e-3 * lambda_max`
+   (estimated by power iteration) and is raised tenfold if a step would blow up
+   the loss on the retained data.
+2. **Warm-start fine-tune.** Continues training on the retained data for a short
+   budget; for the PINNs the loss also includes the equilibrium residual.
+
+The main implementations are in `algorithm2_ff.m` (surrogates) and
+`algorithm2_pinn.m` (PINNs).
 
 ## Requirements
-- MATLAB R2025a or newer
-- Deep Learning Toolbox (`dlarray`, `dlfeval`, `dlgradient`, `adamupdate`)
-- Statistics and Machine Learning Toolbox (paired t-tests, effect sizes)
 
-Scripts write their outputs to a `results/` folder (created automatically) and
-save figures as `.png` in the working directory.
+- MATLAB R2025a or newer (tested with R2025b)
+- Deep Learning Toolbox (`dlarray`, `dlfeval`, `dlgradient`, `adamupdate`, `feedforwardnet`)
+- Statistics and Machine Learning Toolbox (paired t-tests)
+- No GPU and no external data: all data are generated inside the scripts.
 
-## Reproducibility
+## Quick start
 
-See **[REPRODUCE.md](REPRODUCE.md)** for the exact order in which to run the
-scripts to regenerate every table and figure in the paper, including which
-scripts are resumable, which figures depend on which results, and a copy-paste
-one-shot driver.
+Open MATLAB in the repository root and run:
 
-## Primary results (Case Studies 1-6; Tables 1-6, Figures 2-7)
-| Script | Produces |
+```matlab
+run_all(1)   % main results: Tables 2-7 and Figures 2-11 (minutes to about an hour)
+run_all      % everything in the paper (several hours on a desktop CPU)
+```
+
+Each script saves its numbers to `results/` (created automatically), prints its
+table, and writes its figures as `.png` files in the repository root. Fixed
+random seeds make the results reproducible.
+
+## Where to find things
+
+**[REPRODUCE.md](REPRODUCE.md)** lists the script behind every table and figure,
+how to run single scripts, which ones are resumable or take a case-study
+setting, and which files are not needed to reproduce the paper.
+
+| Paper section | Main scripts |
 |---|---|
-| `algorithm2_ff.m` | Feedforward case studies 1-4 (10 seeds): tables + significance |
-| `algorithm2_pinn.m` | PINN case studies 5-6 (5 seeds): tables + significance |
-| `regen_ff_figs.m` | Four-panel result figures for case studies 1-4 |
-| `regen_pinn_figs2.m` | PINN result figures, equilibrium-residual maps, displacement field |
-
-## Analysis and ablation studies
-| Script | Produces |
-|---|---|
-| `UQ.m` | Ensemble uncertainty quantification |
-| `ablation_script.m` | Ablation sweeps (removal count, corruption magnitude, depth, step size) |
-| `comparison_script.m` | Comparison with SISA and Fisher forgetting |
-| `forgetting_analysis.m` | Decomposition of the recovery on the beam case study |
-| `pinn_decomposition.m` | Decomposition on the 2D elasticity PINN |
-| `hessian_influence.m` | Second-order (Newton) influence step on the beam |
-| `pinn_newton.m` | Second-order (Newton) influence step on the Neo-Hookean PINN |
-| `damping_guidance.m` | Power-iteration estimate of the Hessian spectrum for damping |
-| `newton_necessity.m` | Regimes where the Newton step accelerates recovery (adaptive damping) |
-| `beta_ablation_5seed.m` | Physics-weight (beta) sweep, 5 seeds |
-| `similarity_forget.m` | Valid-data (obsolete-state) forgetting test |
-| `scaling_analysis.m` | Model-size scaling of the warm-start speedup |
-| `computational_efficiency.m` | Wall-clock efficiency comparison |
-
-## Revision studies
-The `rev_*.m` scripts produce the studies added in the revision: the four-way
-comparison, physical-consistency metrics, PINN baselines, convergence, correlated
-drift, optimizer sensitivity, efficiency timings, paired tests, the 5-seed
-across-case ablation (Appendix B), and the matched-iteration retrained reference
-(Appendix D). Each is listed with its output file in [REPRODUCE.md](REPRODUCE.md).
+| Main results (Tables 2-9) | `algorithm2_ff.m`, `algorithm2_pinn.m`, `regen_ff_figs.m`, `regen_pinn_figs2.m`, `rev_physics_metrics_ff.m`, `rev_efficiency_*.m` |
+| Analysis studies (Section 4) | `run_uq_all.m`, `ablation_script.m`, `comparison_script.m`, `rev_fourway_ff.m`, `forgetting_analysis.m`, `hessian_influence.m`, `newton_necessity.m`, `scaling_analysis.m`, and others |
+| Appendices B-D | `rev_ablation5_*.m`, `rev_comparison_*.m`, `rev_matched_retrain_*.m` |
 
 ## Applying the method to your own data
-`real_data_unlearning.m` is a data-agnostic template: supply a CSV of
-feature-target rows with an `is_removed` flag, and it runs the full pipeline
-(train biased and retrained models, damped Newton influence step, fine-tune)
-and reports clean/biased/unlearned errors. It does not generate data and will
-stop if no dataset is provided.
 
-## Notes
-- All data are analytically generated with controlled corruption; this study is
-  a proof of concept, and validation on real experimental or finite-element
-  datasets is future work.
+`real_data_unlearning.m` is a data-agnostic template: supply a CSV of
+feature-target rows with an `is_removed` column (1 = remove, 0 = keep), and it
+trains the biased and retrained models, applies the Newton step and fine-tune,
+and reports the clean, biased, and unlearned errors.
+
+## Scope
+
+All case studies use analytically generated data with controlled, injected
+corruption, and the points to remove are assumed known. The study is a proof of
+concept; validation on real experimental or finite-element data is future work.
+
+## Citation
+
+If you use this code, please cite the accompanying manuscript (full reference
+to be added on publication).

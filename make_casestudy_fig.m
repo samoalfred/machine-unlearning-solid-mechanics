@@ -8,11 +8,8 @@
 % and cap() writes the governing equation and the corruption note.
 clear; clc; close all;
 
-% ---- output path (scratchpad) ----
-OUT = ['C:\Users\samoa\AppData\Local\Temp\claude\' ...
-  '--wsl-localhost-ubuntu-18-04-home-samoalfred-candi-plasticity-applications-' ...
-  'crystalPlasticity-fcc-Calibration-Agent\2aa4f8d2-9fcb-488e-8e06-aca60ed3cfd2\' ...
-  'scratchpad\case_study_setups_matlab.png'];
+% ---- output path ----
+OUT = 'case_study_setups_draft.png';   % early draft; the published Figure 2 comes from make_case_study_setups.m
 
 % ---- color palette ----
 K   = [0 0 0];          % structure (black)

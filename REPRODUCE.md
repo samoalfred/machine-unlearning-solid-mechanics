@@ -1,153 +1,143 @@
 # Reproducing the results
 
-This document lists, in order, the scripts to run to reproduce every table and
-figure in the manuscript. Each script is self-contained: it creates a `results/`
-folder, saves its `.mat` outputs there, prints its tables to the command window,
-and (where applicable) writes its `.png` figures to the working directory.
+This guide maps every table and figure in the manuscript to the script that
+produces it, and explains how to run them.
 
-Run everything from the repository root in MATLAB (R2025a+, with the Deep
-Learning and Statistics and Machine Learning toolboxes). Fixed random seeds are
-set inside each script, so results are deterministic up to platform-level
-floating-point differences.
+## Quick start
 
-## Step 0 - Primary results first (other steps do not depend on these, but the figures do)
+1. Install MATLAB R2025a or newer with the **Deep Learning Toolbox** and the
+   **Statistics and Machine Learning Toolbox**. No GPU is needed.
+2. Clone the repository and open MATLAB **in the repository root**.
+3. Run the main results only (Tables 2-7 and their figures):
 
-The two "primary" scripts are **resumable**: each processes one case study (and
-a few seeds) per invocation and appends to its `.mat`. Re-run each repeatedly
-until it prints its final summary line.
+   ```matlab
+   run_all(1)
+   ```
 
-1. **`algorithm2_ff.m`** - feedforward case studies 1-4 (10 seeds each).
-   Re-run until it prints `=== Algorithm 2 feedforward summary (10 seeds) ===`.
-   Produces `results/algorithm2_ff.mat` -> **Tables 1-4** and the significance rows.
-2. **`algorithm2_pinn.m`** - PINN case studies 5-6 (5 seeds each).
-   Re-run until it prints `=== Algorithm 2 PINN summary (5 seeds) ===`.
-   Produces `results/algorithm2_pinn.mat` -> **Tables 5-6** and the significance rows.
+   or everything (all tables and figures, several hours on a desktop CPU):
 
-## Step 1 - Case-study result figures (depend on Step 0)
+   ```matlab
+   run_all
+   ```
 
-3. **`regen_ff_figs.m`** - loads `results/algorithm2_ff.mat`; writes
-   `problem1_results.png` ... `problem4_results.png` -> **Figures 2-5**.
-4. **`regen_pinn_figs2.m`** - loads `results/algorithm2_pinn.mat`; writes
-   `problem5_results.png`, `problem6_results.png`, `problem5_residuals.png`,
-   `problem6_residuals.png`, `problem6_displacement.png` -> **Figures 6-7** and
-   the residual/displacement figures.
+`run_all(stage)` runs stage 1 (main results), 2 (analysis studies of
+Section 4), or 3 (appendices); `run_all([2 3])` runs several. You can also run
+any single script by name, as described below.
 
-## Step 2 - Analysis and ablation studies (independent; run in any order)
+## How the scripts behave
 
-Each of these is standalone (no dependency on Steps 0-1) and reproduces one part
-of the Results section:
+- **Outputs.** Each script creates `results/` if needed, saves its numbers there
+  as a `.mat` file, prints its table to the command window, and writes any
+  figure as a `.png` in the repository root.
+- **Determinism.** Random seeds are fixed inside every script, so results are
+  reproducible up to platform-level floating-point differences.
+- **Data.** All data are generated analytically inside the scripts; nothing
+  needs to be downloaded.
+- **Resumable scripts** save after every seed and continue where they stopped
+  if re-run. `algorithm2_ff.m` and `algorithm2_pinn.m` finish one case study per
+  call (re-run until the summary line appears; `run_all` does this for you), and
+  `rev_comparison_pinn6.m` runs one seed per call (5 calls).
+- **Case-selector scripts** run one case study at a time, chosen by a variable
+  set before the call, for example:
 
-5. **`UQ.m`** -> `uncertainty.png`, `results/uq.mat` (uncertainty quantification).
-6. **`ablation_script.m`** -> `ablation.png`, `results/ablation.mat` (ablation sweeps).
-7. **`comparison_script.m`** -> `results/comparison.mat` (SISA / Fisher-forgetting comparison table).
-8. **`forgetting_analysis.m`** -> `results/forgetting.mat` (decomposition on the beam).
-9. **`pinn_decomposition.m`** -> decomposition on the 2D elasticity PINN.
-10. **`hessian_influence.m`** -> `results/hessian_influence.mat` (second-order Newton step, beam table).
-11. **`pinn_newton.m`** -> `results/pinn_newton.mat` (second-order Newton step, Neo-Hookean PINN table).
-12. **`damping_guidance.m`** -> `results/damping_guidance.mat` (power-iteration lambda_max estimate).
-13. **`newton_necessity.m`** -> `newton_necessity.png`, `results/newton_necessity.mat`
-    (8-seed budget and removal-fraction sweeps with adaptive damping; the "when the
-    Newton step accelerates recovery" table and figure).
-14. **`beta_ablation_5seed.m`** -> `results/beta_ablation_5seed.mat` (physics-weight sweep, 5 seeds).
-15. **`similarity_forget.m`** -> `results/similarity_forget.mat` (valid-data forgetting test).
-16. **`scaling_analysis.m`** -> `scaling.png`, `results/scaling.mat` (model-size scaling).
+  ```matlab
+  for c = 2:4, AB_CASE = c; rev_ablation5_ff; end
+  ```
 
-## Step 3 - Efficiency figure (depends on some Step-0/2 outputs)
+  | Script | Variable | Values |
+  |---|---|---|
+  | `rev_ablation5_ff.m` | `AB_CASE` | 2, 3, 4 |
+  | `rev_ablation5_pinn.m` | `ABP_CASE` | 1 (Case Study 5), 2 (Case Study 6) |
+  | `rev_optimizer_compare.m` | `ROC_CASE` | 1-4 |
+  | `rev_optimizer_pinn.m` | `ROP_CASE` | 1, 2 |
+  | `uq_all_ff.m` / `uq_all_pinn.m` | `UQ_CASE` / `UQP_CASE` | 1-4 / 1-2 (use `run_uq_all.m` instead) |
 
-17. **`rev_efficiency_ff.m`** and **`rev_efficiency_pinn.m`** -> Table 9 of the
-    manuscript (`results/rev_efficiency_ff.mat`, `results/rev_efficiency_pinn.mat`).
-    They time a full cold retrain against Algorithm 1 (adaptive damped Newton step +
-    fine-tune) with the same budgets as the main results, 10 runs per case.
-    `computational_efficiency.m` is kept for reference only: it collates timings
-    from the archived pre-revision prototypes and is not used for Table 9.
+  Run without the variable, these scripts print the summary of what is saved.
+- **Run time** (desktop CPU, MATLAB R2025b): most scripts take a few minutes;
+  the multi-seed studies (ablations, uncertainty ensembles, PINN baselines,
+  matched retrain) take roughly 10-60 minutes each.
 
-## One-shot driver (optional)
+## Script for every table and figure
 
-To run everything non-interactively, execute the following in MATLAB from the
-repo root. The two resumable scripts are looped until complete:
+Numbers refer to the revised manuscript. Table 1 is the nomenclature and
+Figure 1 the method schematic; neither needs code.
 
-```matlab
-% primary results (resumable): loop until all case studies are finalized
-for i=1:6, run('algorithm2_ff.m');  end   % 4 case studies x seeds
-for i=1:3, run('algorithm2_pinn.m'); end   % 2 case studies x seeds
-% figures for the case studies
-run('regen_ff_figs.m'); run('regen_pinn_figs2.m');
-% analysis and ablations
-for s = ["UQ","ablation_script","comparison_script","forgetting_analysis", ...
-         "pinn_decomposition","hessian_influence","pinn_newton","damping_guidance", ...
-         "newton_necessity","beta_ablation_5seed","similarity_forget","scaling_analysis"]
-    run(s + ".m");
-end
-% efficiency (collates timings) last
-run('computational_efficiency.m');
-```
+### Main results (Section 4.1-4.6) -- `run_all(1)`
 
-(The loop counts for the two resumable scripts are upper bounds; each script
-returns early once its `.mat` is complete, so extra iterations are no-ops.)
+| Manuscript item | Script(s) | Output |
+|---|---|---|
+| Figure 2 (case-study setups) | `make_case_study_setups.m` | `case_study_setups.png` |
+| Tables 2-5 (Case Studies 1-4), Table 13 rows 1-4 | `algorithm2_ff.m` (resumable) | `results/algorithm2_ff.mat` |
+| Tables 6-7 (Case Studies 5-6), Table 13 rows 5-6 | `algorithm2_pinn.m` (resumable) | `results/algorithm2_pinn.mat` |
+| Figures 3-6 (surrogate results) | `regen_ff_figs.m` (after `algorithm2_ff.m`) | `problem1_results.png` ... `problem4_results.png` |
+| Figures 7-11 (PINN results, residual and displacement maps) | `regen_pinn_figs2.m` (after `algorithm2_pinn.m`) | `problem5_*.png`, `problem6_*.png` |
+| Table 8 (physical-consistency metrics) | `rev_physics_metrics_ff.m` (surrogates); PINN residuals from `algorithm2_pinn.m` | `results/physics_metrics_ff.mat` |
+| Paired unlearned-vs-retrained tests (Section 4 opening) | `rev_physics_metrics_ff.m` (Case Study 4), `rev_pinn_paired_cs6.m` (Case Study 6) | `results/physics_metrics_ff.mat`, `results/pinn_paired_cs6.mat` |
+| Table 9 (wall-clock cost) | `rev_efficiency_ff.m`, `rev_efficiency_pinn.m` | `results/rev_efficiency_*.mat` |
 
-## Not part of reproduction
+### Analysis studies (Section 4.7-4.22) -- `run_all(2)`
 
-- `real_data_unlearning.m` - drop-in template for applying the method to a real
-  dataset; not used for any reported result.
+| Manuscript item | Script(s) | Output |
+|---|---|---|
+| Figure 12 (beam uncertainty) | `run_uq_all.m` (runs `uq_all_ff.m`, `uq_all_pinn.m`, `uq_summary.m`) | `uncertainty.png`, `results/uq_all_*.mat` |
+| Figure 13 (beam ablation) | `ablation_script.m` (`replot_ablation_fig.m` redraws it) | `ablation.png`, `results/ablation.mat` |
+| Table 10, Figure 14 (beam: SISA, Fisher, retraining) | `comparison_script.m`, then `comparison_bars_fig.m` | `results/comparison.mat`, `comparison_bars.png` |
+| Table 11 (Fisher forgetting vs Newton on the elasticity PINN) | `rev_pinn_fisher.m` | `results/rev_pinn_fisher.mat` |
+| Table 12 (Adam vs Levenberg-Marquardt) | `rev_optimizer_compare.m` (`ROC_CASE`), `rev_optimizer_pinn.m` (`ROP_CASE`) | `results/rev_optimizer_*.mat` |
+| Table 14 (four-way comparison), Table 15 (retain/forget/test) | `rev_fourway_ff.m`, `rev_pinn_fourway.m` | `results/rev_fourway_ff.mat`, `results/rev_pinn_fourway.mat` |
+| Table 16 (PINN convergence) | `rev_pinn_convergence.m` | `results/rev_pinn_convergence.mat` |
+| Figure 15 (correlated sensor drift) | `rev_correlated.m`, then `correlated_drift_fig.m` | `results/rev_correlated.mat`, `correlated_drift.png` |
+| Table 17 (decomposition, beam) | `forgetting_analysis.m` | `results/forgetting.mat` |
+| Table 18 (decomposition, elasticity PINN) | `pinn_decomposition.m` | printed table |
+| Table 19 (Newton step, beam) | `hessian_influence.m` | `results/hessian_influence.mat` |
+| Table 20 (Newton step, Neo-Hookean PINN) | `pinn_newton.m` | `results/pinn_newton.mat` |
+| Damping guidance (lambda_max estimate, Section 4.18) | `damping_guidance.m` | `results/damping_guidance.mat` |
+| Table 21, Figure 16 (when the Newton step helps) | `newton_necessity.m` | `newton_necessity.png`, `results/newton_necessity.mat` |
+| Valid-data forgetting test (Section 4.20) | `similarity_forget.m` | `results/similarity_forget.mat` |
+| Table 22 (physics weight) | `beta_ablation_5seed.m` | `results/beta_ablation_5seed.mat` |
+| Table 23, Figure 17 (model-size scaling) | `scaling_analysis.m` | `scaling.png`, `results/scaling.mat` |
 
-## Revision experiments (major revision, round 1)
+### Appendices -- `run_all(3)` (Appendix A is produced in stage 2)
 
-These scripts were added for the first major revision and produce the new
-tables and figures requested by the reviewers:
+| Manuscript item | Script(s) | Output |
+|---|---|---|
+| Table 24, Figure 18 (Appendix A, uncertainty across cases) | `run_uq_all.m` | `uq_appendix.png` |
+| Table 25 (Appendix B, ablation across cases, 5 seeds, matched baseline) | `rev_ablation5_ff.m` (`AB_CASE`=2:4), `rev_ablation5_pinn.m` (`ABP_CASE`=1:2) | `results/ablation5_ff.mat`, `results/ablation5_pinn.mat` |
+| Table 26 (Appendix C, SISA and Fisher on Case Studies 2-4 and 6) | `rev_comparison_surrogates.m`, `rev_comparison_pinn6.m` (5 calls) | `results/rev_comparison_*.mat` |
+| Table 27 (Appendix D, matched-iteration retrain and safeguard check) | `rev_matched_retrain_ff.m`, `rev_matched_retrain_pinn.m` | `results/matched_retrain_*.mat` |
 
-- `rev_fourway_ff.m` -- four-way comparison (fine-tune only / Newton only /
-  Newton+fine-tune / full retrain) with retain, forget, and test metrics, for
-  the four feedforward case studies.
-- `rev_pinn_fourway.m` -- the same four-way comparison for the two PINN cases.
-- `rev_pinn_convergence.m` -- PINN convergence study (training-iteration and
-  collocation-density sweeps, plus the full pipeline re-run at the largest budget).
-- `rev_correlated.m` -- a spatially correlated sensor-drift corruption (a harder,
-  more realistic, non-i.i.d. test).
-- `rev_pinn_fisher.m` -- a stronger external baseline (diagonal-Fisher forgetting)
-  on the 2D elasticity PINN.
+## Training optimizers
 
-Each is self-contained and writes its `.mat` output to `results/`.
+The main results and most studies train every model with Adam in MATLAB's
+`dlarray` framework, which supplies the Hessian-vector products for the Newton
+step. A few supporting beam-level studies use MATLAB's `feedforwardnet` with
+Levenberg-Marquardt: the beam decomposition (`forgetting_analysis.m`), the beam
+ablation (`ablation_script.m`), the SISA/Fisher comparisons on the surrogates
+(`comparison_script.m`, `rev_comparison_surrogates.m`), and the valid-data test
+(`similarity_forget.m`). `scaling_analysis.m` uses scaled conjugate gradient.
+Each of these compares conditions trained with the same optimizer.
 
-## Revision experiments (major revision, rounds 2-5)
+## Applying the method to your own data
 
-- `rev_optimizer_compare.m`, `rev_optimizer_pinn.m` -- sensitivity to the training
-  optimizer (Adam vs Levenberg--Marquardt, tight and loss-matched).
-- `rev_comparison_surrogates.m`, `rev_comparison_pinn6.m` -- SISA / Fisher
-  baselines on Case Studies 2-4 and the Neo-Hookean PINN (Appendix C);
-  `comparison_bars_fig.m` draws the comparison figure.
-- `correlated_drift_fig.m` -- figure for the correlated sensor-drift study
-  (data from `rev_correlated.m`).
-- `uq_all_ff.m`, `uq_all_pinn.m`, `uq_summary.m` -- uncertainty quantification
-  across all six case studies (Appendix A). Each ensemble uses one fixed test set
-  shared by all members. Run everything with **`run_uq_all.m`**.
-- `ablation_all_ff.m`, `ablation_all_pinn.m` -- earlier 2-seed ablation across the case
-  studies, superseded for Appendix B by `rev_ablation5_ff.m` / `rev_ablation5_pinn.m`
-  (below); `replot_ablation_fig.m`, `replot_analysis_figs.m` redraw figures.
-- `rev_efficiency_ff.m`, `rev_efficiency_pinn.m` -- Table 9 timings (see Step 3).
-- `rev_physics_metrics_ff.m` -- Table 8 physical-consistency metrics for Case Studies
-  1, 3, 4, computed on the Algorithm 1 models (same seeds as `algorithm2_ff.m`;
-  `results/physics_metrics_ff.mat`, which also stores the per-seed CS4 errors).
-- `rev_pinn_paired_cs6.m` -- per-seed Case Study 6 errors (same seeds as
-  `algorithm2_pinn.m`) for the paired unlearned-vs-retrained test in Section 4
-  (`results/pinn_paired_cs6.mat`).
-- `rev_matched_retrain_ff.m`, `rev_matched_retrain_pinn.m` -- Appendix D (Table 27): re-run
-  Algorithm 1 with the main-result seeds and add retrained references with a matched
-  iteration count (retrained + same fine-tune; cold retrain for the same total budget),
-  plus the safeguard check (`results/matched_retrain_ff.mat`, `results/matched_retrain_pinn.mat`).
-- `rev_ablation5_ff.m`, `rev_ablation5_pinn.m` -- Appendix B (Table 19): 5-seed ablation of the
-  number of removed points and the corruption magnitude for Case Studies 2-6, with a matched
-  clean baseline (clean model + same fine-tune). Run `for AB_CASE=2:4, rev_ablation5_ff; end`
-  and `for ABP_CASE=1:2, rev_ablation5_pinn; end` (`results/ablation5_ff.mat`, `results/ablation5_pinn.mat`).
-- `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies of
-  the two second-order diagnostics (identical results, one seed per call).
-- `check_beam_min.m`, `make_casestudy_fig.m` -- small diagnostic / draft-figure
-  helpers; `make_casestudy_fig.m` is an early draft; the published Figure 2
-  (case-study schematic) is produced by **`make_case_study_setups.m`**.
+`real_data_unlearning.m` is a data-agnostic template. Supply a CSV of
+feature-target rows with an `is_removed` column marking the points to remove;
+it trains the biased and retrained models, applies the damped Newton step and
+the fine-tune, and reports the clean, biased, and unlearned errors. It does not
+generate data and stops if no dataset is given. It is not used for any
+reported result.
 
-Optimizer note: the primary results use Adam in the `dlarray` framework. The
-decomposition, the beam ablation (`ablation_script.m`), the surrogate
-SISA/Fisher comparisons, and the valid-data test use MATLAB's `feedforwardnet`
-(Levenberg--Marquardt); `scaling_analysis.m` uses scaled conjugate gradient.
+## Other files (not needed to reproduce the paper)
 
-The beam uncertainty figure and Section 4.9 numbers now come from the corrected
-Adam ensembles (`uq_all_ff.m` + `uq_summary.m`); `UQ.m` is kept for reference only.
+- `UQ.m` -- earlier uncertainty script. **Do not run it after `run_uq_all.m`:**
+  it overwrites `uncertainty.png` with the pre-revision version.
+- `computational_efficiency.m` -- collates timings from the pre-revision
+  prototypes; Table 9 now comes from `rev_efficiency_*.m`.
+- `replot_analysis_figs.m` -- redraws `scaling.png` from `results/scaling.mat`
+  (it also writes `computational_efficiency.png`, a figure no longer in the paper).
+- `ablation_all_ff.m`, `ablation_all_pinn.m` -- earlier 2-seed version of
+  Appendix B, superseded by `rev_ablation5_*.m`.
+- `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies
+  of `hessian_influence.m` and `pinn_newton.m` (same results, one seed per call).
+- `check_beam_min.m` -- small diagnostic of the beam training data.
+- `make_casestudy_fig.m` -- early draft of Figure 2; the published figure comes
+  from `make_case_study_setups.m`.

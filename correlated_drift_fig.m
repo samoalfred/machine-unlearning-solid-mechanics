@@ -8,8 +8,8 @@
 clear; clc; close all;
 
 % ---- paths + configuration ----
-ROOT='C:\Users\samoa\OneDrive - Umich\Documents\My Projects\Machine Unlearning';
-OUT=fullfile(ROOT,'Revisions','Revised Manuscript','correlated_drift.png');
+ROOT=pwd;   % run from the repository root (needs results/rev_correlated.mat)
+OUT='correlated_drift.png';
 
 layers=[1 20 15 1]; nL=numel(layers)-1; k=100; Fsc=500;   % network, beam stiffness, input scale
 adamIters=1500; Tft=80; cgIters=60; gammaFrac=1e-3;   % train/fine-tune/CG iters, damping fraction
