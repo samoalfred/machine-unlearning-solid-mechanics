@@ -127,6 +127,12 @@ Each is self-contained and writes its `.mat` output to `results/`.
 - `ablation_all_ff.m`, `ablation_all_pinn.m` -- ablation across the case studies
   (Appendix B); `replot_ablation_fig.m`, `replot_analysis_figs.m` redraw figures.
 - `rev_efficiency_ff.m`, `rev_efficiency_pinn.m` -- Table 9 timings (see Step 3).
+- `rev_physics_metrics_ff.m` -- Table 8 physical-consistency metrics for Case Studies
+  1, 3, 4, computed on the Algorithm 1 models (same seeds as `algorithm2_ff.m`;
+  `results/physics_metrics_ff.mat`, which also stores the per-seed CS4 errors).
+- `rev_pinn_paired_cs6.m` -- per-seed Case Study 6 errors (same seeds as
+  `algorithm2_pinn.m`) for the paired unlearned-vs-retrained test in Section 4
+  (`results/pinn_paired_cs6.mat`).
 - `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies of
   the two second-order diagnostics (identical results, one seed per call).
 - `check_beam_min.m`, `make_casestudy_fig.m` -- small diagnostic / draft-figure
