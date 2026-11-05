@@ -7,8 +7,8 @@ clear; clc; close all;
 Ld=2; R=0.5; Nc=300; Nb=200; Nbad=40; beta=3e-5; off=[0.30 0.20];
 layers=[2 50 50 50 2]; mu=1; lam=0.33; E=1; nu=0.33; la=0.1; nL=numel(layers)-1; isH=false;
 uref=@(x,y) deal((la/E)*x.*(1+0.5*R^2./(x.^2+y.^2)), -(nu*la/E)*y.*(1+0.5*R^2./(x.^2+y.^2)));
-iters=180; ft=120; S=3; alphaF=5e-4;
-MB=[];MFi=[];MNF=[];MR=[]; RB=[];RFi=[];RNF=[];RR=[];
+iters=180; ft=120; S=3; alphaF=5e-4; alphaBig=5e-3;   % reported step, and a tenfold larger step
+MB=[];MFi=[];MNF=[];MR=[]; RB=[];RFi=[];RNF=[];RR=[]; MFbig=[]; RFbig=[];
 for s=1:S
     rng(60+s+10);
     Xc=sampleDomain(Nc,Ld,R); th=2*pi*rand(1,Nb/2); Xh=[R*cos(th);R*sin(th)];
@@ -24,18 +24,22 @@ for s=1:S
     gbad=dlfeval(@gradSub,pB,dlarray(Xb(:,bad)/Ld),dlarray(Ubd(:,bad)),Nb,nL);
     pF=fisherStep(pB,gbad,Fdiag,alphaF);
     pFi=fineTune(pF,layers,Xc,Xb(:,keep),Ub(:,keep),Ld,ft,beta,mu,lam,isH);
+    % same scrub with a tenfold larger step (does it diverge?)
+    pFb=fineTune(fisherStep(pB,gbad,Fdiag,alphaBig),layers,Xc,Xb(:,keep),Ub(:,keep),Ld,ft,beta,mu,lam,isH);
     % Proposed: Newton (adaptive) + fine-tune
     pN=adaptiveNewtonP(pB,dlarray(Xb/Ld),dlarray(Ubd),dlarray(Xb(:,keep)/Ld),dlarray(Ub(:,keep)),gbad,1e-3,50,nL);
     pNF=fineTune(pN,layers,Xc,Xb(:,keep),Ub(:,keep),Ld,ft,beta,mu,lam,isH);
     MB(end+1)=pmse(pB,Xt,Ut,nL,Ld); MFi(end+1)=pmse(pFi,Xt,Ut,nL,Ld); MNF(end+1)=pmse(pNF,Xt,Ut,nL,Ld); MR(end+1)=pmse(pC,Xt,Ut,nL,Ld);
     RB(end+1)=meanRes(pB,Xc,mu,lam,Ld,nL,isH); RFi(end+1)=meanRes(pFi,Xc,mu,lam,Ld,nL,isH); RNF(end+1)=meanRes(pNF,Xc,mu,lam,Ld,nL,isH); RR(end+1)=meanRes(pC,Xc,mu,lam,Ld,nL,isH);
-    fprintf('seed %d: biased %.2e fisher %.2e newt+ft %.2e retrain %.2e\n',s,MB(end),MFi(end),MNF(end),MR(end));
+    MFbig(end+1)=pmse(pFb,Xt,Ut,nL,Ld); RFbig(end+1)=meanRes(pFb,Xc,mu,lam,Ld,nL,isH);
+    fprintf('seed %d: biased %.2e fisher %.2e fisher(10x step) %.2e newt+ft %.2e retrain %.2e\n',s,MB(end),MFi(end),MFbig(end),MNF(end),MR(end));
 end
 if ~exist('results','dir'); mkdir('results'); end
-FI=struct('MB',MB,'MFi',MFi,'MNF',MNF,'MR',MR,'RB',RB,'RFi',RFi,'RNF',RNF,'RR',RR);
+FI=struct('MB',MB,'MFi',MFi,'MNF',MNF,'MR',MR,'RB',RB,'RFi',RFi,'RNF',RNF,'RR',RR,'MFbig',MFbig,'RFbig',RFbig,'alphaF',alphaF,'alphaBig',alphaBig);
 save(fullfile('results','rev_pinn_fisher.mat'),'FI');
 fprintf('\n=== PINN (CS5) external-baseline comparison, mean over %d seeds ===\n',S);
 fprintf('field MSE  biased %.2e  Fisher-forget %.2e  Newton+ft %.2e  retrain %.2e\n',mean(MB),mean(MFi),mean(MNF),mean(MR));
+fprintf('Fisher with 10x step (alpha=%.0e): field MSE %.2e, residual %.3f\n',alphaBig,mean(MFbig),mean(RFbig));
 fprintf('residual   biased %.3f  Fisher-forget %.3f  Newton+ft %.3f  retrain %.3f\n',mean(RB),mean(RFi),mean(RNF),mean(RR));
 fprintf('Saved results/rev_pinn_fisher.mat\n');
 
