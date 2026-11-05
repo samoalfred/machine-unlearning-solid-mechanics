@@ -34,6 +34,18 @@ if pidx>2
     save(fullfile('results','algorithm2_pinn.mat'),'Rr'); return;
 end
 if acc.p~=pidx, acc=struct('p',pidx,'mb',[],'ma',[],'mr',[],'K',[],'res',[]); end   % reset accumulator if it belongs to a different case
+% ---- Reference displacement field (uref) ----
+% Both PINN case studies generate their boundary data and test field from the
+% closed-form reference field
+%     u_x =  a*x*(1 + R^2/(2 r^2)),   u_y = -b*y*(1 + R^2/(2 r^2)),   r^2 = x^2 + y^2,
+% a uniform-tension field (with Poisson contraction for Case Study 5) modulated by
+% a term that decays away from the hole of radius R = 0.5:
+%     Case Study 5 (linear elasticity): a = load/E = 0.1,  b = nu*load/E = 0.033
+%     Case Study 6 (Neo-Hookean):       a = b = load = 0.05
+% This field resembles, but is not, the exact plate-with-hole (Kirsch) solution,
+% and it does not satisfy the equilibrium equations exactly. All PINN errors
+% (clean, biased, unlearned, retrained) are measured against this same reference,
+% so the comparisons between models are unaffected.
 isH=(pidx==2);   % isH = true for the Neo-Hookean hyperelastic case
 if isH, layers=[2 30 30 30 2]; mu=1; lam=1; la=0.05; off=[0.15 0.10]; nm='Neo-Hookean Hyperelasticity';   % network, material constants, load amplitude, corruption offset
     uref=@(x,y) deal(la*x.*(1+0.5*R^2./(x.^2+y.^2)), -la*y.*(1+0.5*R^2./(x.^2+y.^2)));   % analytic reference displacement field

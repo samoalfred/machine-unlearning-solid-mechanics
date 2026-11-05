@@ -117,6 +117,25 @@ ablation (`ablation_script.m`), the SISA/Fisher comparisons on the surrogates
 (`similarity_forget.m`). `scaling_analysis.m` uses scaled conjugate gradient.
 Each of these compares conditions trained with the same optimizer.
 
+## PINN reference displacement field
+
+Both PINN case studies (5 and 6) generate their boundary data and test field
+from the closed-form reference field `uref`, defined and documented in
+[`algorithm2_pinn.m`](algorithm2_pinn.m#L37-L53):
+
+```
+u_x =  a*x*(1 + R^2/(2 r^2)),   u_y = -b*y*(1 + R^2/(2 r^2)),   r^2 = x^2 + y^2
+```
+
+with hole radius `R = 0.5`, `(a, b) = (0.1, 0.033)` for Case Study 5 and
+`(0.05, 0.05)` for Case Study 6. It is a uniform-tension field modulated by a
+term that decays away from the hole. It resembles, but is not, the exact
+plate-with-hole (Kirsch) solution and does not satisfy equilibrium exactly, so
+part of the clean model's equilibrium residual comes from the reference itself.
+All PINN models (clean, biased, unlearned, retrained) are measured against this
+same field, so the comparisons between them are unaffected. Every PINN script
+uses the same definition.
+
 ## Applying the method to your own data
 
 `real_data_unlearning.m` is a data-agnostic template. Supply a CSV of
