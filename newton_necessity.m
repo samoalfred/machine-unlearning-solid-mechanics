@@ -68,24 +68,27 @@ end
 fprintf('Saved results/newton_necessity.mat\n');
 
 %% figure (newton_necessity.png): (a) budget sweep, (b) removal-fraction sweep
-f=figure('Position',[60 60 1150 460],'Color','w');
-ax1=subplot(1,2,1); hold on; grid on;
-p1=semilogy(budgets, mean(ftOnlyA,1),'r-o','LineWidth',1.6,'MarkerFaceColor','r');
-p2=semilogy(budgets, mean(newtFtA,1),'m-s','LineWidth',1.6,'MarkerFaceColor','m');
-p3=yline(mean(retrA),'k--','LineWidth',1.4);
-set(ax1,'YScale','log'); xlabel('Fine-tune budget T (iterations)'); ylabel('MSE to true');
-text(0.03,0.06,'(a)','Units','normalized','FontWeight','bold','FontSize',12);
-ax2=subplot(1,2,2); hold on; grid on;
-semilogy(fracs*100, mean(ftOnlyB,1),'r-o','LineWidth',1.6,'MarkerFaceColor','r');
-semilogy(fracs*100, mean(newtFtB,1),'m-s','LineWidth',1.6,'MarkerFaceColor','m');
-semilogy(fracs*100, mean(retrB,1),'k--^','LineWidth',1.4);
-set(ax2,'YScale','log'); xlabel('Removal fraction (%)'); ylabel('MSE to true');
-text(0.90,0.06,'(b)','Units','normalized','FontWeight','bold','FontSize',12);
-set(ax1,'Position',[0.08 0.22 0.40 0.72]); set(ax2,'Position',[0.57 0.22 0.40 0.72]);
-lg=legend(ax1,[p1 p2 p3],{'Fine-tune only','Newton + fine-tune','Retrained baseline'}, ...
-    'Orientation','horizontal','Box','off');
-lg.Units='normalized'; lg.Position=[0.5-lg.Position(3)/2, 0.03, lg.Position(3), lg.Position(4)];
-exportgraphics(f,'newton_necessity.png','Resolution',200);
+f=figure('Units','inches','Position',[1 1 11 4.6],'Color','w');
+tl=tiledlayout(f,1,2,'TileSpacing','compact','Padding','compact');
+lw=2; ms=8; fs=13; cR=[0.85 0.10 0.10]; cN=[0.75 0.00 0.75];
+ax1=nexttile(tl); hold(ax1,'on'); grid(ax1,'on'); box(ax1,'on');
+p1=plot(ax1,budgets,mean(ftOnlyA,1),'-o','Color',cR,'LineWidth',lw,'MarkerSize',ms,'MarkerFaceColor',cR);
+p2=plot(ax1,budgets,mean(newtFtA,1),'-s','Color',cN,'LineWidth',lw,'MarkerSize',ms,'MarkerFaceColor',cN);
+p3=plot(ax1,budgets,repmat(mean(retrA),size(budgets)),'k--^','LineWidth',1.6,'MarkerSize',ms-1);
+set(ax1,'YScale','log','FontSize',fs); ylim(ax1,[1e-4 1]);
+xlabel(ax1,'Fine-tune budget T (iterations)'); ylabel(ax1,'Clean-test MSE (to true physics)');
+title(ax1,'(a) Removal fraction \approx 17%','FontWeight','normal');
+ax2=nexttile(tl); hold(ax2,'on'); grid(ax2,'on'); box(ax2,'on');
+plot(ax2,fracs*100,mean(ftOnlyB,1),'-o','Color',cR,'LineWidth',lw,'MarkerSize',ms,'MarkerFaceColor',cR);
+plot(ax2,fracs*100,mean(newtFtB,1),'-s','Color',cN,'LineWidth',lw,'MarkerSize',ms,'MarkerFaceColor',cN);
+plot(ax2,fracs*100,mean(retrB,1),'k--^','LineWidth',1.6,'MarkerSize',ms-1);
+set(ax2,'YScale','log','FontSize',fs); ylim(ax2,[1e-4 1]);
+xlabel(ax2,'Removal fraction (%)'); ylabel(ax2,'Clean-test MSE (to true physics)');
+title(ax2,sprintf('(b) Fine-tune budget T = %d',Tsmall),'FontWeight','normal');
+hLeg=legend(ax1,[p1 p2 p3],{'Fine-tune only','Newton + fine-tune','Retrained from scratch'}, ...
+    'Orientation','horizontal','FontSize',fs,'Box','on');
+hLeg.Layout.Tile='north';
+exportgraphics(f,'newton_necessity.png','Resolution',300,'BackgroundColor','white');
 fprintf('Saved newton_necessity.png\n');
 
 %% ---------- helpers (shared with algorithm2_ff.m) ----------
