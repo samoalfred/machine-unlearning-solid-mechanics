@@ -23,8 +23,8 @@ Given a trained model and the set of points to remove, Algorithm 1 in the paper:
 2. **Warm-start fine-tune.** Continues training on the retained data for a short
    budget; for the PINNs the loss also includes the equilibrium residual.
 
-The main implementations are in `algorithm2_ff.m` (surrogates) and
-`algorithm2_pinn.m` (PINNs).
+The main implementations are in `main/algorithm2_ff.m` (surrogates) and
+`main/algorithm2_pinn.m` (PINNs).
 
 ## Requirements
 
@@ -42,25 +42,39 @@ run_all(1)   % main results: Tables 2-7 and Figures 2-11 (minutes to about an ho
 run_all      % everything in the paper (several hours on a desktop CPU)
 ```
 
+To run a single script instead, call `setup` once per session (it adds the code
+folders to the MATLAB path), then the script by name, for example:
+
+```matlab
+setup
+algorithm2_ff
+```
+
 Each script saves its numbers to `results/` (created automatically), prints its
 table, and writes its figures as `.png` files in the repository root. Fixed
 random seeds make the results reproducible.
 
-## Where to find things
+## Repository layout
 
-**[REPRODUCE.md](REPRODUCE.md)** lists the script behind every table and figure,
-how to run single scripts, which ones are resumable or take a case-study
-setting, and which files are not needed to reproduce the paper.
+```
+run_all.m      runs every study in the paper, in order (stages 1-3)
+setup.m        adds the code folders to the MATLAB path
+main/          Algorithm 1 on all six case studies (Tables 2-9)
+analysis/      the analysis studies of Section 4 (Tables 10-23, Figures 12-16)
+appendix/      the appendix studies (Tables 25-27)
+figures/       scripts that draw the paper's figures from saved results
+template/      apply the method to your own dataset
+legacy/        superseded pre-revision scripts, kept for reference only
+results/       created on first run; every script saves its .mat output here
+```
 
-| Paper section | Main scripts |
-|---|---|
-| Main results (Tables 2-9) | `algorithm2_ff.m`, `algorithm2_pinn.m`, `regen_ff_figs.m`, `regen_pinn_figs2.m`, `rev_physics_metrics_ff.m`, `rev_efficiency_*.m` |
-| Analysis studies (Section 4) | `run_uq_all.m`, `ablation_script.m`, `rev_comparison_beam_adam.m`, `rev_fourway_ff.m`, `forgetting_analysis.m`, `hessian_influence.m`, `newton_necessity.m`, `scaling_analysis.m`, and others |
-| Appendices B-D | `rev_ablation5_*.m`, `rev_comparison_*.m`, `rev_matched_retrain_*.m` |
+**[REPRODUCE.md](REPRODUCE.md)** maps every table and figure in the paper to the
+script that produces it, and explains which scripts are resumable or take a
+case-study setting.
 
 ## Applying the method to your own data
 
-`real_data_unlearning.m` is a data-agnostic template: supply a CSV of
+`template/real_data_unlearning.m` is a data-agnostic template: supply a CSV of
 feature-target rows with an `is_removed` column (1 = remove, 0 = keep), and it
 trains the biased and retrained models, applies the Newton step and fine-tune,
 and reports the clean, biased, and unlearned errors.

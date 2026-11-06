@@ -12,12 +12,13 @@ function run_all(stages)
 %            Newton step, necessity, valid-data test, physics weight, scaling)
 %   Stage 3  Appendices B-D (across-case ablation, baselines, matched retrain)
 %
-%   Run from the repository root. Every script writes its .mat output to
+%   Run from the repository root (setup.m adds the code folders to the path). Every script writes its .mat output to
 %   results/ and its figures (.png) to the repository root. Scripts are run in
 %   the base workspace, so each behaves exactly as if typed at the prompt.
 %   See REPRODUCE.md for which script produces which table or figure.
 
 if nargin < 1, stages = 1:3; end
+setup;   % add the code folders to the path and move to the repository root
 t0 = tic;
 
 if any(stages == 1)

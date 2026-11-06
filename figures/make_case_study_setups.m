@@ -8,7 +8,7 @@
 % cap() writes the governing relation and the corruption note, and xmark() draws
 % the red crosses that mark corrupted boundary points.
 clear; clc; close all;
-OUT = fullfile(fileparts(mfilename('fullpath')),'Revisions','Revised Manuscript','case_study_setups.png');
+OUT = 'case_study_setups.png';   % saved in the current folder (repository root)
 
 K  = [0 0 0];            % structure
 GY = [0.4 0.4 0.4];      % axes / deflection
