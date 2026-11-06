@@ -36,7 +36,7 @@ if any(stages == 2)
     step('Stage 2: analysis studies (Section 4)');
     run1('run_uq_all');                          % Figure 12, Table 24, Figure 17
     run1('ablation_script');                     % Figure 13 (beam ablation)
-    run1('comparison_script');                   % Table 10
+    run1('rev_comparison_beam_adam');            % Table 10
     run1('rev_pinn_fisher');                     % Table 11
     for c = 1:4, run1(sprintf('ROC_CASE=%d; rev_optimizer_compare', c)); end   % Table 12 (surrogates)
     for c = 1:2, run1(sprintf('ROP_CASE=%d; rev_optimizer_pinn', c)); end      % Table 12 (PINNs)

@@ -55,7 +55,7 @@ setting, and which files are not needed to reproduce the paper.
 | Paper section | Main scripts |
 |---|---|
 | Main results (Tables 2-9) | `algorithm2_ff.m`, `algorithm2_pinn.m`, `regen_ff_figs.m`, `regen_pinn_figs2.m`, `rev_physics_metrics_ff.m`, `rev_efficiency_*.m` |
-| Analysis studies (Section 4) | `run_uq_all.m`, `ablation_script.m`, `comparison_script.m`, `rev_fourway_ff.m`, `forgetting_analysis.m`, `hessian_influence.m`, `newton_necessity.m`, `scaling_analysis.m`, and others |
+| Analysis studies (Section 4) | `run_uq_all.m`, `ablation_script.m`, `rev_comparison_beam_adam.m`, `rev_fourway_ff.m`, `forgetting_analysis.m`, `hessian_influence.m`, `newton_necessity.m`, `scaling_analysis.m`, and others |
 | Appendices B-D | `rev_ablation5_*.m`, `rev_comparison_*.m`, `rev_matched_retrain_*.m` |
 
 ## Applying the method to your own data

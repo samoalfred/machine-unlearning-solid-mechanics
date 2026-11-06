@@ -81,7 +81,7 @@ Figure 1 the method schematic; neither needs code.
 |---|---|---|
 | Figure 12 (beam uncertainty) | `run_uq_all.m` (runs `uq_all_ff.m`, `uq_all_pinn.m`, `uq_summary.m`) | `uncertainty.png`, `results/uq_all_*.mat` |
 | Figure 13 (beam ablation) | `ablation_script.m` (`replot_ablation_fig.m` redraws it) | `ablation.png`, `results/ablation.mat` |
-| Table 10 (beam: SISA, Fisher, retraining) | `comparison_script.m` | `results/comparison.mat` |
+| Table 10 (beam: retraining, SISA, Fisher, Algorithm 1; Adam) | `rev_comparison_beam_adam.m` | `results/rev_comparison_beam_adam.mat` |
 | Table 11 (Fisher forgetting vs Newton on the elasticity PINN) | `rev_pinn_fisher.m` | `results/rev_pinn_fisher.mat` |
 | Table 12 (Adam vs Levenberg-Marquardt) | `rev_optimizer_compare.m` (`ROC_CASE`), `rev_optimizer_pinn.m` (`ROP_CASE`) | `results/rev_optimizer_*.mat` |
 | Table 14 (four-way comparison), Table 15 (retain/forget/test) | `rev_fourway_ff.m`, `rev_pinn_fourway.m` | `results/rev_fourway_ff.mat`, `results/rev_pinn_fourway.mat` |
@@ -113,7 +113,7 @@ The main results and most studies train every model with Adam in MATLAB's
 step. A few supporting beam-level studies use MATLAB's `feedforwardnet` with
 Levenberg-Marquardt: the beam decomposition (`forgetting_analysis.m`), the beam
 ablation (`ablation_script.m`), the SISA/Fisher comparisons on the surrogates
-(`comparison_script.m`, `rev_comparison_surrogates.m`), and the valid-data test
+(`rev_comparison_surrogates.m`, Case Studies 2-4), and the valid-data test
 (`similarity_forget.m`). `scaling_analysis.m` uses scaled conjugate gradient.
 Each of these compares conditions trained with the same optimizer.
 
@@ -158,7 +158,9 @@ reported result.
 - `hessian_influence_resumable.m`, `pinn_newton_resumable.m` -- resumable copies
   of `hessian_influence.m` and `pinn_newton.m` (same results, one seed per call).
 - `check_beam_min.m` -- small diagnostic of the beam training data.
-- `comparison_bars_fig.m` -- bar-chart version of Table 10 (from `results/comparison.mat`);
+- `comparison_script.m` -- pre-revision beam comparison (Levenberg-Marquardt, first-order
+  step); superseded by `rev_comparison_beam_adam.m` for Table 10.
+- `comparison_bars_fig.m` -- bar-chart version of the pre-revision beam comparison (from `results/comparison.mat`);
   not included in the final manuscript.
 - `make_casestudy_fig.m` -- early draft of Figure 2; the published figure comes
   from `make_case_study_setups.m`.
