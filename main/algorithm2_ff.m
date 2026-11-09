@@ -76,7 +76,7 @@ function makeFig(p,nm,M,nL,barMean,barStd,DPI)
         plot(Fg,Fg/k,'k-','LineWidth',2); plot(Fg,pred(M.pC,xt,nL),'b--','LineWidth',1.5);
         plot(Fg,pred(M.pB,xt,nL),'r--','LineWidth',1.5); plot(Fg,pred(M.pA,xt,nL),'m--','LineWidth',1.5);
         plot(M.Xb*500,M.Tb,'rx','MarkerSize',7,'LineWidth',1.2);
-        xlabel('Force F (N)'); ylabel('Deflection \delta'); legend('True','Clean','Biased','Unlearned','Corrupted','Location','northwest');
+        xlabel('Force F'); ylabel('Deflection \delta'); legend('True','Clean','Biased','Unlearned','Corrupted','Location','northwest');
       case 2
         E0=200; al=0.005; sig=linspace(0,50,100); Tfix=50; xt=[Tfix/100*ones(1,100); sig/50];
         plot(sig,sig/(E0*(1-al*Tfix)),'k-','LineWidth',2); plot(sig,pred(M.pC,xt,nL),'b--','LineWidth',1.5);

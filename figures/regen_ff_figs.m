@@ -29,7 +29,7 @@ function makeFig(p,nm,M,nL,barMean,barStd,DPI)
     % domain + true curve per case study
     switch p
       case 1
-        x=linspace(0,500,300); k=100; xt=x/500; ytrue=x/k; xlab='Force F (N)'; ylab='Deflection \delta';
+        x=linspace(0,500,300); k=100; xt=x/500; ytrue=x/k; xlab='Force F'; ylab='Deflection \delta';
         yc=pred(M.pC,xt,nL); yb=pred(M.pB,xt,nL); ya=pred(M.pA,xt,nL); logx=false;
         xbad=M.Xb*500; tbad=M.Tb; hasbad=true;
       case 2

@@ -50,7 +50,7 @@ h1=plot(Fg,ytrue,'k-','LineWidth',2);
 h2=plot(Fg,yb,'--','Color',[0.85 0.20 0.10],'LineWidth',1.6);
 h3=plot(Fg,yu,'-.','Color',[0.00 0.45 0.74],'LineWidth',1.6);
 h4=plot(Fg,yr,':','Color',[0.10 0.60 0.20],'LineWidth',1.6);
-xlabel('Force F (N)'); ylabel('Deflection \delta'); ylim([0 7]); xlim([0 500]);
+xlabel('Force F'); ylabel('Deflection \delta'); ylim([0 7]); xlim([0 500]);
 title('(a) Correlated sensor-drift corruption and recovery');
 legend([h1 h2 h3 h4],{'True','Biased','Unlearned','Retrained'},'Location','northwest');
 text(Fd,6.6,'removed band','HorizontalAlignment','center','FontSize',9,'Color',[0.6 0.45 0.1]);

@@ -31,11 +31,11 @@ figure('Position',[60 60 1100 440],'Color','w');
 subplot(1,2,1); hold on; grid on;
 fill([Fg fliplr(Fg)],[mB-1.96*sqrt(eB.^2+nz^2) fliplr(mB+1.96*sqrt(eB.^2+nz^2))],[1 0.8 0.8],'EdgeColor','none');
 plot(Fg,Tt,'k-','LineWidth',2); plot(Fg,mB,'r--','LineWidth',1.5);
-xlabel('Force F (N)'); ylabel('Deflection \delta'); title('(a) Biased ensemble'); legend('95% PI','True','Mean','Location','northwest');
+xlabel('Force F'); ylabel('Deflection \delta'); title('(a) Biased ensemble'); legend('95% PI','True','Mean','Location','northwest');
 subplot(1,2,2); hold on; grid on;
 fill([Fg fliplr(Fg)],[mA-1.96*sqrt(eA.^2+nz^2) fliplr(mA+1.96*sqrt(eA.^2+nz^2))],[0.8 0.8 1],'EdgeColor','none');
 plot(Fg,Tt,'k-','LineWidth',2); plot(Fg,mA,'m--','LineWidth',1.5);
-xlabel('Force F (N)'); ylabel('Deflection \delta'); title('(b) Unlearned ensemble'); legend('95% PI','True','Mean','Location','northwest');
+xlabel('Force F'); ylabel('Deflection \delta'); title('(b) Unlearned ensemble'); legend('95% PI','True','Mean','Location','northwest');
 exportgraphics(gcf,'uncertainty.png','Resolution',DPI); fprintf('saved uncertainty.png\n');
 
 %% ---- appendix UQ figure: coverage + epistemic-std reduction across cases ----
